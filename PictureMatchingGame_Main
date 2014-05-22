@@ -1,0 +1,20 @@
+package Picture;
+
+import javax.swing.JFrame;
+
+public class Main extends JFrame{
+
+	public static void main(String[] args) {
+		try {
+			
+		FirstDisplay game=new FirstDisplay();
+		game.setResizable(false);
+			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+
