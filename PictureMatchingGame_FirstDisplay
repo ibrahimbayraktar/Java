@@ -1,0 +1,271 @@
+package Picture;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Menu;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.activation.MailcapCommandMap;
+import javax.lang.model.type.NullType;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.text.html.ImageView;
+
+public class FirstDisplay extends JFrame 
+{
+public static JMenuBar Menubarr;
+ JMenuItem NewGame,Exit,Start,Ins,AboutUs,HighScores,Features;
+ private JPanel panel,Flow;
+ public static JComboBox DifficultLevels;
+ public static JComboBox GameMode;
+ JLabel label,label1;
+public static JMenu File,Option,Help;
+ public static HighScore scores = new HighScore();
+ public FirstDisplay()
+ {
+ setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ setResizable(true);
+ setVisible(true);
+ setSize(450, 300);
+setTitle("Welcome to Game ");
+//Ses dosyası yüklendi girişte çalması için
+AudioClip Clip =new AudioClip();
+AudioClip.AudioClip("C:/Users/Grundıg/eclipse/Proje2_MatchingPicture/Pokemon.wav");
+// icon oluşturuldu
+Image icon = Toolkit.getDefaultToolkit().getImage("icon.png");
+ setIconImage(icon);
+ //Centera Mesaj Eklendi
+ CenterMessage messagePanel = new CenterMessage();
+ messagePanel.setFont(new Font("Californian FB", Font.BOLD, 30));
+ // PANEL AYARLANDI
+WindowsBar bar=new WindowsBar() ;
+
+ panel=new JPanel();
+	 panel.setToolTipText("Welcome The Game");
+	 panel.setLayout(new BorderLayout(5,5));
+panel.setBackground(new Color(0,131,247));
+//Flow Layout Oluşturdum
+Flow=new JPanel();
+Flow.setName("Levels");
+Flow.setLayout(new FlowLayout(FlowLayout.LEFT));
+Flow.setBackground(new Color(0,131,247));
+//Combo box oluşturmak
+label=new JLabel("Chose Level :");
+label.setFont(new Font("Tahoma", Font.BOLD, 14));
+label.setForeground(Color.white);
+
+
+label1=new JLabel("Game Mode :");
+label1.setFont(new Font("Tahoma", Font.BOLD, 14));
+label1.setForeground(Color.white);
+
+
+DifficultLevels=new JComboBox();
+DifficultLevels.setModel(new DefaultComboBoxModel(new String[] {"Easy 4x4", "Middle 6x6", "Hard 8x8"}));
+DifficultLevels.setBackground(Color.white);
+DifficultLevels.setForeground(Color.black);
+
+
+GameMode=new JComboBox();
+GameMode.setModel(new DefaultComboBoxModel(new String[] {"Single Player","Multiple Player"}));
+GameMode.setBackground(Color.white);
+GameMode.setForeground(Color.black);
+
+//Panele ekleme işlemleri yapıldı
+Flow.add(label,FlowLayout.LEFT);
+Flow.add(DifficultLevels,FlowLayout.CENTER);
+Flow.add(label1,FlowLayout.RIGHT);
+Flow.add(GameMode,FlowLayout.LEADING);
+
+panel.add(messagePanel,BorderLayout.CENTER);
+
+panel.add(Flow,BorderLayout.NORTH);
+
+add(panel);
+
+
+
+	 // Menubar ve Menuitem oluşturma;
+ Menubarr=new JMenuBar();
+ Menubarr.setBackground(Color.WHITE);
+
+
+ NewGame=new JMenuItem("New Game");
+NewGame.setBackground(Color.yellow);
+NewGame.setForeground(new Color(0,131,247));
+Exit=new JMenuItem("Exit");
+Exit.setBackground(Color.yellow);	
+Exit.setForeground(new Color(0,131,247));
+Ins=new JMenuItem("Instructions");
+Ins.setBackground(Color.yellow);		
+Ins.setForeground(new Color(0,131,247));
+AboutUs = new JMenuItem("About Us");
+AboutUs.setBackground(Color.yellow);	
+AboutUs.setForeground(new Color(0,131,247));
+	HighScores=new JMenuItem("High Scores");
+	HighScores.setBackground(Color.yellow);
+	HighScores.setForeground(new Color(0,131,247));
+	Start=new JMenuItem("Start");
+	Start.setBackground(Color.yellow);
+	Start.setForeground(new Color(0,131,247));
+	Features=new JMenuItem("Feature");
+	Features.setBackground(Color.yellow);
+	Features.setForeground(new Color(0,131,247));
+	Menubarr();
+ }
+ 
+public void Menubarr()
+ {
+	 setJMenuBar(Menubarr);
+	 File=new JMenu("File");
+	 File.setForeground(new Color(0,131,247));
+	 Option=new JMenu("Option");
+	 Option.setForeground(new Color(0,131,247));
+	 Help = new JMenu("Help");
+	 Help.setForeground(new Color(0,131,247));
+	 File.add(NewGame);
+		File.addSeparator();
+		 File.add(Start);
+			File.addSeparator();
+		File.add(Exit);
+		NewGame.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			Object source = arg0.getSource();
+			if (source==NewGame){
+				GameWindow Game = new GameWindow(DifficultLevels.getSelectedIndex(),GameMode.getSelectedIndex());
+				Game.setVisible(true);
+			setVisible(false);
+			}
+			}
+			
+		});
+		Start.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+				// TODO Auto-generated method stub
+				if(source == Start)
+				{
+					GameWindow Game = new GameWindow(DifficultLevels.getSelectedIndex(),GameMode.getSelectedIndex());
+					Game.setVisible(true);
+					setVisible(false);
+				}
+			}
+		} );
+		
+		Exit.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				Object source = e.getSource();
+				if(source==Exit)
+				{
+				JOptionPane.showMessageDialog(null, "\t\t\t\t\tCome Again :D\n","Exit",JOptionPane.CLOSED_OPTION);	
+			System.exit(0);				
+			}
+				}
+		});
+		Option.add(Ins);
+		Option.addSeparator();
+		Option.add(HighScores);
+		Option.addSeparator();
+	Help.add(AboutUs);
+	AboutUs.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			Object source=e.getSource();
+			if(source == AboutUs)
+			{
+				Icon myPicture = new ImageIcon("indir.jpg");
+				JOptionPane.showMessageDialog(null,
+				" İbrahim BAYRAKTAR \n     Electric and Electronic Engineer\n\n   This Game was created for JAVA Proje \n\n      Guess the Picture: \n    Copy Right: 2014 İbrahim"
+				,"About Us",JOptionPane.INFORMATION_MESSAGE,myPicture);
+			}
+		
+		}
+	});
+	Help.add(Features);
+	Features.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			JOptionPane.showMessageDialog(null,
+					"1- There are Diffrent Levels which have Boxes on the Game Screen. \n\n2- Each Box contain a picture hidden inside it. \n\n3- There are also instructions given to let you know \nhow to play the game.\n\n4- If you want to quit or restart the game during \nthe play you just need to click in the file menu \nand select the desire option. \n\n5- Since this is a time game, & you have enough time \nchance to complete it within the given time."
+					,"Features",JOptionPane.INFORMATION_MESSAGE);
+				}
+		}
+	);
+	
+Ins.addActionListener(new ActionListener() {
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object Source = e.getSource();
+	if(Source==Ins)
+	{
+		JOptionPane.showMessageDialog(null,
+				"1- There are Different levels which have diffrent Boxes on the Screen \n\n2- Each Box contain a picture hidden inside that Box \n\n3- You have to select 2 Boxes with same pictures \n\n4- If you select one Box with the picture which doesn't \nmatch with the second one then you will lose your one \nchance and you will have to try finding  picture which are matching each other. \n\n5- You have enough time."
+				,"Instructions",JOptionPane.INFORMATION_MESSAGE);
+	}
+	}
+});
+HighScores.addActionListener(new ActionListener() {
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		Object source = e.getSource();
+		if(source == HighScores)
+		{
+			 String msg ="<html>";
+			    
+			    for(int i = 0;i<HighScore.highscores.length;i++){
+			    	msg+=HighScore.highscores[i]+"<br>";
+			    }
+
+			    JOptionPane window = new JOptionPane();
+			    window.setMessage(msg);
+			   window.setMessageType(JOptionPane.INFORMATION_MESSAGE);
+			    JDialog dialog = window.createDialog(null, "High Score Table");
+			  dialog.setBackground(Color.pink);
+			   dialog.setForeground(Color.BLACK);
+			  dialog.setFont(new Font("Times New Roman",Font.BOLD , 20));
+			    dialog.setVisible(true);
+		}
+
+	}
+});
+
+Menubarr.add(File);
+Menubarr.add(Option);
+Menubarr.add(Help);
+
+ } 
+	}
+ 
