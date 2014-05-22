@@ -1,0 +1,474 @@
+package Picture;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.List;
+import java.awt.MenuBar;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Timer;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+public class GameWindow extends JFrame
+{
+	public static JMenuBar Menubarr;
+	JMenuItem NewGame,Exit,Start,Ins,AboutUs,HighScores,Save,Load;
+	public static JMenu File,Option,Help;
+	private JPanel FirstPanel;
+	public static int GameMode;//Burada bilgisayar mı kullanıcı oynuyacak onu ayarlamak için 
+	private int DifficultLevel;// Burada zorluk derecesi ayarlanmak için tanımlandı
+	Toolkit toolkit;
+	Timer timer;
+	// Kullanıcın bilgisayar ile oynarken oynarken sırasını beklemek için tanımlandı ilk başta KUllanıcı oynayacağı için True
+	public static boolean AbletoPlay = true;
+	public static int RemainingCard;// Kalan kard sayısını hesaplamak için oluşturuldu
+	public static long tStart;
+	public static int OpenCard = 0;// ilk başta ki açık kard sayısı
+	public static int Moving_Num = 0;//Hamle sayısı
+	public static int Open_Card = -1;
+	public static int Open_Card2 = -5;
+	private int Number_Of_Square;
+	public static int Gamer_OR_Computer = 0;  // 0: kullanıcı , 1:bilgisayar
+	
+	
+	
+	
+	ArrayList<Integer> Number = new ArrayList<Integer>();//Buraya resimlerin sayıları atanıyor
+
+	
+	public static ArrayList<SetupPicture> GameTable = new ArrayList<SetupPicture>();// Resimleri Arraylistin içine attım kontrol etmek için
+	
+	public static void ChangeGamer(){
+		
+		if(GameMode==1){
+			if(Gamer_OR_Computer==1){ // oyun sırası bilgisayardaysa 
+				Gamer_OR_Computer=0;  // oyun sırasını oyuncuya geçirir
+				AbletoPlay= true; 
+			}else{
+				AbletoPlay = false; // sıra bilgisayara geçtiği için oyuncu oyuna müdahale edemez.
+				Gamer_OR_Computer=1;
+				
+				Computer();
+			}
+			
+		}
+		
+	}
+	
+	
+	private static void Computer(){
+		int es1=1;
+		int es2=1;
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+		
+		boolean Matching_Control = false;
+		
+		for(int i = 0 ; i< GameTable.size() ;i++){
+			if(GameTable.get(i).OpenorNot == false && GameTable.get(i).Look==true && GameTable.get(i).Picture_Num!=0){
+				SetupPicture ra = FindMatching(GameTable.get(i).Picture_Num,i);// Yüklediğim resimleri eşlenlerini bulmak için ra eşütkledim
+				//oyuntablosu.get(i)
+				
+				if(ra!=null){  // görülen 2 kart eşleşmişse  
+					es1 = i;
+					es2 = ra.index;
+					GameTable.get(i).ChangePicture(GameTable.get(i).Picture_Num);
+					ra.ChangePicture(ra.Picture_Num);
+					GameWindow.RemainingCard-=2;
+					ra.OpenorNot = true;
+					GameTable.get(i).OpenorNot = true;
+					Matching_Control=true;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+					break;
+				}
+			}
+			
+		}
+		
+	if(Matching_Control==false){ // görülenler içinde hiç eşleşen kart yoksa  // Random - Görüldü Durumu
+			int i = randomPic();
+			int k=-1;
+			int id =GameTable.get(i).Picture_Num;
+			GameTable.get(i).OpenorNot = true;
+			GameTable.get(i).Look = true;
+			GameTable.get(i).ChangePicture(GameTable.get(i).Picture_Num);
+			SetupPicture es = FindMatching(id,i);  // random kart açtıktan sonra görülenler arasından tekran eşini kontorl eder
+			
+			if(es!=null){  // eşini bulursa o kartı da açar
+				es1 = es.index;
+				es2 = i;
+				es.ChangePicture(es.Picture_Num);
+				es.OpenorNot = true;
+				es.Look = true;
+			}else{ //bbulamazsa 2. kartı da rastgegele olarak açar.
+				 k = randomPic();
+				 es1 = k;
+				 es2 = i;
+				 GameTable.get(k).ChangePicture(GameTable.get(k).Picture_Num);
+				 GameTable.get(k).OpenorNot = true;
+				 GameTable.get(k).Look = true;
+			}
+			
+			
+			
+			if(GameTable.get(es1).Picture_Num !=GameTable.get(es2).Picture_Num){
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+				GameTable.get(es1).closePicture();
+				GameTable.get(es1).OpenorNot = false;
+				GameTable.get(es2).closePicture();
+				GameTable.get(es2).OpenorNot=false;
+				
+			}
+		}
+		
+		
+		
+	Gamer_OR_Computer=0;
+		AbletoPlay= true;
+		
+	}
+	
+	
+	private static int randomPic(){ // kapalı kartlar gelene kadar random sayı üretir.
+		int Number = 1;
+		while(Number==1){
+			 Random r=new Random(); 
+			 int a=r.nextInt(GameTable.size());
+			if(GameTable.get(a).OpenorNot==false){
+				Number = a;
+			}
+		}
+		return Number;
+		
+	}
+	
+	private static SetupPicture FindMatching(int id,int j){ //
+		SetupPicture PictureArea= null;// Resim alanı
+		for(int i = j+1 ; i< GameTable.size() ;i++){
+			if(GameTable.get(i).OpenorNot==false && GameTable.get(i).Look==true && id==GameTable.get(i).Picture_Num){
+				PictureArea = GameTable.get(i);
+			}
+	
+		}
+		return PictureArea;
+		
+	}
+	
+	
+	private void AssignRandomPicture(){ // resim alanlarının resimidleri sırasıyla uygun random değerler bulunarak atanır.
+		for(int i = 0;i<GameTable.size();i++){
+			Random rnd = new Random();
+			int num = rnd.nextInt(GameTable.size())+1;
+			
+			if(!Number.contains(num)){
+				Number.add(num);
+				if(num%2==0){
+					num =num/2;
+				}else{
+					num = (num+1)/2;
+				}
+				GameTable.get(i).Picture_Num = num;
+				
+			}else{
+				i--;
+			}
+		}
+		
+
+		
+	}
+
+	public GameWindow(int Difficult,int Gamemode) {
+		tStart = System.currentTimeMillis();
+		DifficultLevel = Difficult;
+		GameMode =Gamemode;
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setBounds(100, 100, 498, 496);
+		FirstPanel = new JPanel();
+	FirstPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(FirstPanel);
+		FirstPanel.setLayout(new BorderLayout(0, 0));	
+		JPanel content = new JPanel();
+	FirstPanel.add(content, BorderLayout.CENTER);
+		 Menubarr=new JMenuBar();
+			NewGame=new JMenuItem("New Game");
+			Exit=new JMenuItem("Exit");
+			Ins=new JMenuItem("Instructions");
+			AboutUs = new JMenuItem("About Us");
+			HighScores=new JMenuItem("High Scores");
+			Start=new JMenuItem("Start");
+			Save=new JMenuItem("Save");
+			Load=new JMenuItem("Load");
+		if(Difficult == 0){
+			Number_Of_Square = 16;
+			RemainingCard = 16;
+			setSize(475,510);
+			setResizable(false);
+			Image icon = Toolkit.getDefaultToolkit().getImage("icon.png");
+			 setIconImage(icon);
+			 MenuBarr();
+		}else if(Difficult == 1){
+			Number_Of_Square = 36;
+			RemainingCard=36;
+			setSize(675,720);
+			Image icon = Toolkit.getDefaultToolkit().getImage("icon.png");
+			 setIconImage(icon);
+			setResizable(false);
+			MenuBarr();
+			
+		}else if(Difficult == 2){
+			Number_Of_Square = 64;
+			RemainingCard = 64;
+			Image icon = Toolkit.getDefaultToolkit().getImage("icon.png");
+			 setIconImage(icon);
+			setSize(900,900);
+			setResizable(true);
+			MenuBarr();
+		}
+		
+	
+		
+		
+		for(int i = 0;i<Number_Of_Square;i++){
+		SetupPicture Picture = new SetupPicture();
+			Picture.index = i;
+			content.add(Picture.Pic_Area);
+			GameTable.add(Picture);
+		}
+		
+		AssignRandomPicture();
+		
+		
+	}
+
+
+
+
+	private void MenuBarr() {
+
+		setJMenuBar(Menubarr);
+		 File=new JMenu("File");
+		 Option=new JMenu("Option");
+		 Help = new JMenu("Help");
+		 File.add(NewGame);
+			File.addSeparator();
+			 File.add(Start);
+				File.addSeparator();
+			File.add(Exit);
+			NewGame.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					Object source = arg0.getSource();
+					if (source==NewGame){
+						GameWindow Game = new GameWindow(FirstDisplay.DifficultLevels.getSelectedIndex(),FirstDisplay.GameMode.getSelectedIndex());
+						Game.setVisible(true);
+					setVisible(false);
+					}
+				}
+			});
+			
+			Start.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					Object source = e.getSource();
+					// TODO Auto-generated method stub
+					if(source == Start)
+					{
+						GameWindow Game = new GameWindow(FirstDisplay.DifficultLevels.getSelectedIndex(),FirstDisplay.GameMode.getSelectedIndex());
+						Game.setVisible(true);
+						setVisible(false);
+					}
+				}
+			});
+			Exit.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					Object source = e.getSource();
+					if(source==Exit)
+					{
+					JOptionPane.showMessageDialog(null, "\t\t\t\t\tCome Again :D\n","Exit",JOptionPane.CLOSED_OPTION);	
+				System.exit(0);				
+				}
+					
+				}
+			});
+			
+			Option.add(Save);
+			Option.addSeparator();
+			Save.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			Option.add(Load);
+			Load.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+					/*String Text="src/com/odev/resimesleme/OyunEkrani.java";
+					
+					
+					
+					try{
+					FileReader Read=new FileReader(Text);
+					BufferedReader BR=new BufferedReader(Read);{
+						String str;
+						while((str=BR.readLine())!=null){
+						
+						
+							PrintWriter pw=new PrintWriter(str);
+						
+							//pw.println(text);
+						
+							
+						}
+					}
+					
+					}catch (IOException e) {
+						// TODO: handle exception
+					}
+					}*/
+					 String filename = JOptionPane.showInputDialog("Save");
+				        JFileChooser savefile = new JFileChooser();
+				        savefile.setSelectedFile(new File(filename));
+				        savefile.showSaveDialog(savefile);
+				        BufferedWriter writer;
+				        int sf = savefile.showSaveDialog(null);
+				        if(sf == JFileChooser.APPROVE_OPTION){
+				            try {
+				            	writer = new BufferedWriter(new FileWriter(savefile.getSelectedFile()));
+				            //.write(writer); 
+				            	writer.close();
+				                JOptionPane.showMessageDialog(null, "File has been saved","File Saved",JOptionPane.INFORMATION_MESSAGE);
+				                // true for rewrite, false for override
+
+				            } catch (IOException a) {
+				                a.printStackTrace();
+				            }
+				        }else if(sf == JFileChooser.CANCEL_OPTION){
+				            JOptionPane.showMessageDialog(null, "File save has been canceled");
+				        }
+				    }
+					
+					
+				
+			});
+			Option.addSeparator();
+			Option.add(HighScores);
+			HighScores.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					Object source = e.getSource();
+					if(source == HighScores)
+					{
+						 String message ="<html>";
+						    
+						    for(int i = 0;i<HighScore.highscores.length;i++){
+						    	message+=HighScore.highscores[i]+"<br>";
+						    }
+
+						    JOptionPane window = new JOptionPane();
+						    window.setMessage(message);
+						   window.setMessageType(JOptionPane.INFORMATION_MESSAGE);
+						    JDialog dialog = window.createDialog(null, "High Score Table");
+						  dialog.setBackground(Color.pink);
+						   dialog.setForeground(Color.BLACK);
+						  dialog.setFont(new Font("Times New Roman",Font.BOLD , 20));
+						    dialog.setVisible(true);
+					}
+
+				}
+				
+			});
+			Option.addSeparator();
+			Help.add(Ins);
+			Ins.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					Object Source =arg0.getSource();
+					if(Source==Ins)
+					{
+						JOptionPane.showMessageDialog(null,
+								"1- There are Different levels which have diffrent Boxes on the Screen \n\n2- Each Box contain a picture hidden inside that Box \n\n3- You have to select 2 Boxes with same pictures \n\n4- If you select one Box with the picture which doesn't \nmatch with the second one then you will lose your one \nchance and you will have to try finding  picture which are matching each other. \n\n5- You have enough time."
+								,"Instructions",JOptionPane.INFORMATION_MESSAGE);
+					}
+					
+				}
+			});
+			Help.addSeparator();
+			Help.add(AboutUs);
+			AboutUs.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				Object source=arg0.getSource();
+					if(source == AboutUs)
+					{
+						Icon myPicture = new ImageIcon("indir.jpg");
+						JOptionPane.showMessageDialog(null,
+						"   İbrahim BAYRAKTAR \n\n    Electric and Electronic Engineer\n\n   This Game was created for JAVA Proje \n\n    Guess the Picture: \n\n    Copy Right: 2014 İbrahim"
+						,"About Us",JOptionPane.INFORMATION_MESSAGE,myPicture);
+					}
+				}
+			});
+			Help.addSeparator();
+			//Companentler eklendi bara
+			Menubarr.add(File);
+			Menubarr.add(Option);
+			Menubarr.add(Help);
+
+	}
+	
+
+
+}
+
+
+
